@@ -2,13 +2,96 @@
   text-align: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+body {
+  font-family: 'Arial', sans-serif;
+  background: black;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
   color: white;
+  text-align: center;
+  margin: 20px;
+  font-size: 60px;
+}
+
+
+.post-card {
+  background: #222021;
+  color: white;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.post-card-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.post-card-top p {
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+/*url hover*/
+.post-card-top p:hover{
+  color: rgb(93, 93, 255);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.post-card-bottom {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.post-card-bottom #post-comments:hover {
+  color: red;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.post-card-bottom #post-author:hover {
+  color: red;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.post-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  background: #363636;
+  cursor: pointer;
+}
+
+
+.post-card h2::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #007bff;
+  transition: width 0.3s;
+}
+
+.post-card:hover h2::after {
+  width: 100%;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.post:hover {
+  animation: pulse 1s infinite;
 }
