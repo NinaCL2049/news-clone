@@ -1,74 +1,99 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css';
 import ListArticles from './components/ListArticles';
 import SearchForm from './components/SearchForm';
 import DisplayArticleCard from './components/DisplayArticleCard';
 
-class App extends Component {
+function App(){
+  const [listOfArticles, setListOfArticles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeSearch, setTypeSearch] = useState('all');
+  const [sortBy, setSortBy] = useState('popularity');
+  const [forSearch, setForSearch] = useState('');
+  const [timeSearch, setTimeSearch] = useState('all-time');
 
-  constructor(props) {
+  // Fetch articles on page load
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
-    super(props);
+  // Fetch articles for search query, type, and time, and sort by popularity/date
+  useEffect(() => {
+    if(searchQuery) {
+      searchPosts(searchQuery);
+    } else if (typeSearch !== 'all') {
+      fetchTypeSearch();
+    } else if (timeSearch !== 'all-time') {
+      fetchTimeSearch();
+    } else if (sortBy !== 'popularity') {
+      fetchBySearch(sortBy, forSearch);
+    } else {
+      fetchArticles();
+    }
+  }, [searchQuery, sortBy, typeSearch, timeSearch]);
 
-    this.state = {
-      listOfArticles: [],
-      searchQuery: '',
-      typeSearch: 'all', // Default to 'all'
-      bySearch: '', // Default to 'popularity'
-      timeSearch: 'all-time' // Default to 'all-time'
-    };
+  // Handle functions
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
   }
 
-  // Fetch articles when component mounts
-  componentDidMount() {
-    this.fetchArticles();
+  const handleTypeSearch = (e) => {
+    setTypeSearch(e.target.value);
+    fetchTypeSearch();
   }
 
+  const handleTimeSearch = (e) => {
+    setTimeSearch(e.target.value);
+    fetchTimeSearch();
+  }
 
-  // Function for handling search input
-  handleInputChange = (e) => {
-    this.setState({ searchQuery: e.target.value }, () => {
-      this.searchPosts();
+  const handleSortBy = (sortOption) => {
+    setSortBy(sortOption);
+  }
+
+  const handleForSearch = (e) => {
+    setForSearch(e.target.value);
+    fetchBySearch('popularity', e.target.value);
+  }
+
+  const handleSearch = (criteria) => {
+    setSearchQuery(criteria);
+    searchPosts(criteria);
+  }
+
+  // Functions for searching posts
+  const searchPosts = (e) => {
+    const searchQuery = document.getElementById('search-bar').value
+
+    fetch(`https://hn.algolia.com/api/v1/search?query=${searchQuery}`)
+    .then((response) => response.json())
+    .then((data) => {
+      setListOfArticles(data.hits);
     });
-  }
-
-  handleTypeSearch = (e) => {
-    this.setState({ typeSearch: e.target.value });
-  }
-
-  handleTimeSearch = (e) => {
-    this.setState({ timeSearch: e.target.value });
   }
 
   // Function for fetching articles
-  fetchArticles = () => {
+  const fetchArticles = () => {
     fetch('http://hn.algolia.com/api/v1/search?tags=front_page')
     .then((response) => response.json())
     .then((data) => {
-      this.setState({
-        listOfArticles: data.hits,
-      });
+      setListOfArticles(data.hits);
     });
-  } 
-
-  // Function for searching time 
-  handleTimeSearch = (e) => {
-    this.setState({timeSearch: e.target.value}, () => {
-      this.fetchTimeSearch();
-    })
   }
 
   // Functions for the search form 
-  fetchTimeSearch = () => {
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${this.state.timeSearch}`)
+  const fetchTimeSearch = () => {
+
+    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${timeSearch}`)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-      this.setState({listOfArticles: data.hits});
+        
+      setListOfArticles(data.hits); 
       })
   }
 
-  fetchTypeSearch = () => {
+  // Function for searching by type
+  const fetchTypeSearch = () => {
     const tagToTitlePrefix = {
       'ask-hn': 'Ask HN:',
       'show-hn': 'Show HN:',
@@ -76,142 +101,108 @@ class App extends Component {
       'polls': 'Poll:'
     }
 
-    const keyword = this.state.typeSearch;
+    const keyword = typeSearch;
     const titlePrefix = tagToTitlePrefix[keyword] || keyword;
     
-    let page = 0;
-    fetch(`http://hn.algolia.com/api/v1/search?page=${page}&hitsPerPage=1000`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
+    fetch(`http://hn.algolia.com/api/v1/search?page=0&hitsPerPage=1500`)
+    .then(response => response.json()
     .then(data => {
-      console.log('Fetched Data:', data); // Log the data to see what we're getting
-
-      if (!data || !data.hits) {
-        console.error('Data or data.hits is undefined');
-        return;
-      }
-
       const filteredArticles = data.hits.filter(article => {
         const title = article.title || article.story_title || '';
-        return title.includes(titlePrefix) 
+        return title.includes(titlePrefix);
       });
-
-      if (filteredArticles.length === 0) {
-        console.log('No articles found with the prefix:', titlePrefix);
-      }
-
-      this.setState({ listOfArticles: filteredArticles });
+      setListOfArticles(filteredArticles);
     })
     .catch(error => {
-      console.error('error:', error);
-    });
+      console.log('error:', error);
+    }));
   }
 
   // Function for searching by popularity/date
-  fetchBySearch = (sortBy = 'popularity', keyword = this.state.typeSearch) => {
-    fetch(`http://hn.algolia.com/api/v1/search?tags=${keyword}&hitsPerPage=1000`)
+  const fetchBySearch = (sortBy = 'popularity', keyword = typeSearch) => {
+    // Get the current date in the format YYYY-MM-DD 
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${currentDate}`)
     .then(response => response.json())
     .then(data => {
-      if (!data || !data.hits) {
-        console.error('Data or data.hits is undefined');
-        return;
-      }
 
-      let sortedArticles;
+      let sortedArticles = [...data.hits];
 
+      // Sort the articles based on the selected option
       if (sortBy === 'popularity') {
-        sortedArticles = data.hits.sort((a, b) => b.points - a.points);
+        const now = new Date();
+        sortedArticles.sort((a, b) => {
+          // Calculate the age of the post in days
+          const ageA = (now - new Date(a.created_at)) / (1000 * 60 * 60 * 24); // Age in days
+          const ageB = (now - new Date(b.created_at)) / (1000 * 60 * 60 * 24);
+
+          // Higher points are better, but older posts are worse
+          const scoreA = a.points / Math.log1p(ageA);
+          const scoreB = b.points / Math.log1p(ageB);
+        
+          // Sort by score 
+          return scoreB - scoreA;
+        });
+        // Sort by date
       } else if (sortBy === 'date') {
-        sortedArticles = data.hits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      } else {
-        sortedArticles = [...data.hits]; // Create a copy if no sorting is needed
+        // Sorts by most recent post made
+        sortedArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       }
-
-      console.log(`Sorted articles by ${sortBy}:`, sortedArticles);
-
-      this.setState({ listOfArticles: sortedArticles });
+      setListOfArticles(sortedArticles);
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.log('Error:', error);
     });
   }
 
-  // Function for searching by type 
-  handleTypeSearch = (e) => {
-    this.setState({typeSearch: e.target.value}, () => {
-      this.fetchTypeSearch();
-    })
-  }
-
-  // Functions for searching posts
-  searchPosts = (e) => {
-    const searchQuery = document.getElementById('search-bar').value
-
-    fetch(`https://hn.algolia.com/api/v1/search?query=${searchQuery}`)
-    .then((response) => response.json())
-    .then((data) => {
-      this.setState({listOfArticles: data.hits});
-    });
-  }
-
-  handleSearch = (criteria) => {
-    this.setState({ searchCriteria: criteria }, () => {
-      this.searchPosts(criteria);
-    });
-  }
-
-  render() {
-    return (
-      <div className='App'>
-        <h1>Hacker News</h1>
-        
-        <form onSubmit={this.searchPosts}>
-          <input
-            onChange={this.handleInputChange}
-            value={this.state.searchQuery}
-            id="search-bar" 
-            type="text" 
-            placeholder="Search..." 
-          />
-        </form>
-
-        <SearchForm 
-          typeSearch={this.state.typeSearch}
-          bySearch={this.state.bySearch}
-          timeSearch={this.state.timeSearch}
-          handleForSearch={this.handleForSearch}
-          handleTimeSearch={this.handleTimeSearch}
-          handleTypeSearch={this.handleTypeSearch}
-          fetchTimeSearch={this.fetchTimeSearch}
-          fetchTypeSearch={this.fetchTypeSearch}
-          fetchBySearch={this.fetchBySearch}
+  return (
+    <div className='App'>
+      <h1>Hacker News</h1>
+      
+      <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchQuery) }}>
+        <input
+          onChange={handleInputChange}
+          value={searchQuery}
+          id="search-bar" 
+          type="text" 
+          placeholder="Search..." 
         />
+      </form>
 
-        <div className="articles-container">
-          {this.state.listOfArticles.length > 0 ? (
-            this.state.listOfArticles.map((article, index) => (
-              <ListArticles
-                key={index}
-                title={article.title || article.story_title}
-                author={article.author}
-                url={article.url || article.story_url}
-                points={article.points || 'N/A'}
-                num_comments={article.num_comments || 'N/A'}
-                created_at={article.created_at}
-                searchQuery={this.state.searchQuery}
-              />
-              ))
-            ) : (
-            <p>No stories found.</p>
-          )}
-        </div>
+      <SearchForm 
+        typeSearch={typeSearch}
+        sortBy={sortBy}
+        timeSearch={timeSearch}
+        handleForSearch={handleForSearch}
+        handleTimeSearch={handleTimeSearch}
+        handleTypeSearch={handleTypeSearch}
+        fetchTimeSearch={fetchTimeSearch}
+        fetchTypeSearch={fetchTypeSearch}
+        fetchBySearch={fetchBySearch}
+        handleSortBy={handleSortBy}
+      />
+
+      <div className="articles-container">
+        {listOfArticles.length > 0 ? (
+          listOfArticles.map((article, index) => (
+            <ListArticles
+              key={index}
+              title={article.title || article.story_title}
+              author={article.author}
+              url={article.url || article.story_url}
+              points={article.points || 'N/A'}
+              num_comments={article.num_comments || 'N/A'}
+              created_at={article.created_at}
+              searchQuery={searchQuery}
+            />
+            ))
+          ) : (
+          <p>No stories found.</p>
+        )}
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 
