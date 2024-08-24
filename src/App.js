@@ -83,12 +83,33 @@ function App(){
 
   // Functions for the search form 
   const fetchTimeSearch = () => {
+    let queryDate = null;
 
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${timeSearch}`)
+    switch(timeSearch) {
+      case 'all-time':
+        fetchArticles();
+        return;
+      case 'last-24h':
+        queryDate = ('popularity', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        break;
+      case 'past-week':
+        queryDate = ('popularity', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        break;
+      case 'past-month':
+        queryDate = ('popularity', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        break;
+      case 'past-year':
+        queryDate = ('popularity', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+        break;
+      default:
+        console.log('Invalid time search');
+        return;
+      }
+
+    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${queryDate}`)
     .then((response) => response.json())
-    .then((data) => {
-        
-      setListOfArticles(data.hits); 
+    .then((data) => {      
+       setListOfArticles(data.hits); 
       })
   }
 
@@ -97,14 +118,14 @@ function App(){
     const tagToTitlePrefix = {
       'ask-hn': 'Ask HN:',
       'show-hn': 'Show HN:',
-      'jobs': 'is hiring',
+      'jobs': 'Hiring',
       'polls': 'Poll:'
     }
 
     const keyword = typeSearch;
     const titlePrefix = tagToTitlePrefix[keyword] || keyword;
     
-    fetch(`http://hn.algolia.com/api/v1/search?page=0&hitsPerPage=1500`)
+    fetch(`http://hn.algolia.com/api/v1/search?page=0&hitsPerPage=1000`)
     .then(response => response.json()
     .then(data => {
       const filteredArticles = data.hits.filter(article => {
@@ -201,6 +222,7 @@ function App(){
           <p>No stories found.</p>
         )}
       </div>
+
     </div>
   );
 }

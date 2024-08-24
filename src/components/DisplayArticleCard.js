@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const DisplayArticleCard = (props) => {
-  
+const DisplayArticleCard = () => {
+
 }
 
 export default DisplayArticleCard;
