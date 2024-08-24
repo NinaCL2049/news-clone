@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 
-
-const SearchForm = (props) => {
-
-  const { forSearch, bySearch, timeSearch, handleTypeSearch, handleTimeSearch } = props;
+const SearchForm = ({
+  forSearch,
+  sortBy,
+  timeSearch,
+  handleTypeSearch,
+  handleTimeSearch,
+  handleSortBy
+  }) => {
 
   return (
     <div className="search-form">
@@ -19,7 +23,7 @@ const SearchForm = (props) => {
       </select>
 
       <label>By</label>
-      <select placeholder="Select" className="by-search targeted-search">
+      <select placeholder="Select" className="by-search targeted-search" onChange={(e) => handleSortBy(e.target.value)}>
         <option value="popularity">Popularity</option>
         <option value="date">Date</option>
       </select>
