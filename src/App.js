@@ -115,28 +115,21 @@ function App(){
 
   // Function for searching by type
   const fetchTypeSearch = () => {
-    const tagToTitlePrefix = {
-      'ask-hn': 'Ask HN:',
-      'show-hn': 'Show HN:',
-      'jobs': 'Hiring',
-      'polls': 'Poll:'
-    }
+  let url;
 
-    const keyword = typeSearch;
-    const titlePrefix = tagToTitlePrefix[keyword] || keyword;
-    
-    fetch(`http://hn.algolia.com/api/v1/search?page=0&hitsPerPage=1000`)
-    .then(response => response.json()
+    if(typeSearch === 'jobs') {
+      url = `https://hn.algolia.com/api/v1/search?query=is_hiring`;
+    } else {
+      url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
+    }
+    fetch(url)
+    .then(response => response.json())
     .then(data => {
-      const filteredArticles = data.hits.filter(article => {
-        const title = article.title || article.story_title || '';
-        return title.includes(titlePrefix);
-      });
-      setListOfArticles(filteredArticles);
+      setListOfArticles(data.hits);
     })
     .catch(error => {
-      console.log('error:', error);
-    }));
+        console.log('error:', error);
+      })
   }
 
   // Function for searching by popularity/date
