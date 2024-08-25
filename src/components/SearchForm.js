@@ -14,12 +14,12 @@ const SearchForm = ({
       <label>Search</label>
       <select placeholder="Select" className="for-search targeted-search" onChange={handleTypeSearch}>
         <option value="all">All</option>
-        <option value="stories">Stories</option>
-        <option value="comments">Comments</option>
-        <option value="ask-hn">Ask HN</option>
-        <option value="show-hn">Show HN</option>
+        <option value="story">Stories</option>
+        <option value="comment">Comments</option>
+        <option value="ask_hn">Ask HN</option>
+        <option value="show_hn">Show HN</option>
         <option value="jobs">Jobs</option>
-        <option value="polls">Polls</option>
+        <option value="poll">Polls</option>
       </select>
 
       <label>By</label>
