@@ -197,23 +197,15 @@ function App(){
         handleSortBy={handleSortBy}
       />
 
+
       <div className="articles-container">
-        {listOfArticles.length > 0 ? (
-          listOfArticles.map((article, index) => (
+        
             <ListArticles
-              key={index}
-              title={article.title || article.story_title}
-              author={article.author}
-              url={article.url || article.story_url}
-              points={article.points || 'N/A'}
-              num_comments={article.num_comments || 'N/A'}
-              created_at={article.created_at}
+
               searchQuery={searchQuery}
+              listOfArticles={listOfArticles}
             />
-            ))
-          ) : (
-          <p>No stories found.</p>
-        )}
+          
       </div>
 
     </div>
