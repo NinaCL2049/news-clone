@@ -1,4 +1,4 @@
 # Hacker News Clone 
 
-Install dependencies: `npm install`
-Start: `npm start`
+1. Install dependencies: `npm install`.
+2. Start: `npm start`.
