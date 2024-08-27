@@ -10,4 +10,3 @@ To get started, follow these steps:
 That's it! You're all set to start using the application.
 
 ![Screenshot](screenshot_readme.png)
-
