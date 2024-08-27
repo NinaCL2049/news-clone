@@ -3,7 +3,6 @@ import './App.css';
 import ListArticles from './components/ListArticles';
 import SearchForm from './components/SearchForm';
 import DisplayArticleCard from './components/DisplayArticleCard';
-import { type } from '@testing-library/user-event/dist/type';
 
 function App(){
   const [listOfArticles, setListOfArticles] = useState([]);
@@ -128,7 +127,7 @@ function App(){
       })
   }
 
-  // Function for searching by type
+  // Function for searching by type: story, comment, ask_hn, show_hn, job, poll
   const fetchTypeSearch = () => {
   let url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
 
@@ -149,9 +148,6 @@ function App(){
 
   // Function for searching by popularity/date
   const fetchBySearch = () => {
-    // Get the current date in the format YYYY-MM-DD 
-    const currentDate = new Date().toISOString().split('T')[0];
-
     let url = `https://hn.algolia.com/api/v1/search_by_date`;
 
     if (sortBy === "date") {
@@ -162,29 +158,7 @@ function App(){
     .then(response => response.json())
     .then(data => {
       console.log(url)
-      let sortedArticles = [...data.hits];
-
-      // Sort the articles based on the selected option
-      if (sortBy === 'popularity') {
-        const now = new Date();
-        sortedArticles.sort((a, b) => {
-          // Calculate the age of the post in days
-          const ageA = (now - new Date(a.created_at)) / (1000 * 60 * 60 * 24); // Age in days
-          const ageB = (now - new Date(b.created_at)) / (1000 * 60 * 60 * 24);
-
-          // Higher points are better, but older posts are worse
-          const scoreA = a.points / Math.log1p(ageA);
-          const scoreB = b.points / Math.log1p(ageB);
-        
-          // Sort by score 
-          return scoreB - scoreA;
-        });
-        // Sort by date
-      } else if (sortBy === 'date') {
-        // Sorts by most recent post made
-        sortedArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      }
-      setListOfArticles(sortedArticles);
+      setListOfArticles(data.hits);
     })
     .catch(error => {
       console.log('Error:', error);
