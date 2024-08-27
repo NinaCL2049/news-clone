@@ -1,4 +1,12 @@
-# Hacker News Clone 
+# Hacker News Clone
+Get started
 
-1. Install dependencies: `npm install`.
-2. Start: `npm start`.
+To get started, follow these steps:
+
+1. Install dependencies by running the command `npm i`.
+
+2. Run the application by executing `npm start`.
+
+That's it! You're all set to start using the application.
+
+![Screenshot](screenshot_readme.png)
