@@ -3,11 +3,12 @@ import './App.css';
 import ListArticles from './components/ListArticles';
 import SearchForm from './components/SearchForm';
 import DisplayArticleCard from './components/DisplayArticleCard';
+import { type } from '@testing-library/user-event/dist/type';
 
 function App(){
   const [listOfArticles, setListOfArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeSearch, setTypeSearch] = useState('all');
+  const [typeSearch, setTypeSearch] = useState('');
   const [sortBy, setSortBy] = useState('popularity');
   const [forSearch, setForSearch] = useState('');
   const [timeSearch, setTimeSearch] = useState('all-time');
@@ -21,8 +22,6 @@ function App(){
   useEffect(() => {
     if(searchQuery) {
       searchPosts(searchQuery);
-    } else if (typeSearch !== 'all') {
-      fetchTypeSearch();
     } else if (timeSearch !== 'all-time') {
       fetchTimeSearch();
     } else if (sortBy !== 'popularity') {
@@ -30,7 +29,13 @@ function App(){
     } else {
       fetchArticles();
     }
-  }, [searchQuery, sortBy, typeSearch, timeSearch]);
+  }, [searchQuery, sortBy, timeSearch]);
+
+  useEffect(() => {
+    if (typeSearch) {
+      fetchTypeSearch();
+    }
+  }, [typeSearch]);
 
   // Handle functions
   const handleInputChange = (e) => {
@@ -39,7 +44,7 @@ function App(){
 
   const handleTypeSearch = (e) => {
     setTypeSearch(e.target.value);
-    fetchTypeSearch();
+    //fetchTypeSearch(e.target.value);
   }
 
   const handleTimeSearch = (e) => {
@@ -64,10 +69,18 @@ function App(){
   // Functions for searching posts
   const searchPosts = (e) => {
     const searchQuery = document.getElementById('search-bar').value
+    let url = `https://hn.algolia.com/api/v1/search?query=${searchQuery}`
 
-    fetch(`https://hn.algolia.com/api/v1/search?query=${searchQuery}`)
+    if(typeSearch !== 'all' && sortBy === 'date') {
+      url = `https://hn.algolia.com/api/v1/search_by_date?query=${searchQuery}&tags=${typeSearch}`; 
+    } else if (sortBy !== 'date') {
+      url = `https://hn.algolia.com/api/v1/search?query=${searchQuery}&tags=${typeSearch}`;
+    }
+
+    fetch(url)
     .then((response) => response.json())
     .then((data) => {
+      console.log(url)
       setListOfArticles(data.hits);
     });
   }
@@ -106,7 +119,9 @@ function App(){
         return;
       }
 
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${queryDate}`)
+    let url = `http://hn.algolia.com/api/v1/search_by_date?query=${queryDate}`;      
+
+    fetch(url)
     .then((response) => response.json())
     .then((data) => {      
        setListOfArticles(data.hits); 
@@ -115,16 +130,16 @@ function App(){
 
   // Function for searching by type
   const fetchTypeSearch = () => {
-  let url;
+  let url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
 
-    if(typeSearch === 'jobs') {
-      url = `https://hn.algolia.com/api/v1/search?query=is_hiring`;
-    } else {
-      url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
-    }
+  if(sortBy === 'date') {
+    url = `https://hn.algolia.com/api/v1/search_by_date?tags=${typeSearch}`;
+  }
+
     fetch(url)
     .then(response => response.json())
     .then(data => {
+      console.log(url)
       setListOfArticles(data.hits);
     })
     .catch(error => {
@@ -133,14 +148,20 @@ function App(){
   }
 
   // Function for searching by popularity/date
-  const fetchBySearch = (sortBy = 'popularity', keyword = typeSearch) => {
+  const fetchBySearch = () => {
     // Get the current date in the format YYYY-MM-DD 
     const currentDate = new Date().toISOString().split('T')[0];
 
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${currentDate}`)
+    let url = `https://hn.algolia.com/api/v1/search_by_date`;
+
+    if (sortBy === "date") {
+      url += `?tags=${typeSearch}`;
+    }
+
+    fetch(url)
     .then(response => response.json())
     .then(data => {
-
+      console.log(url)
       let sortedArticles = [...data.hits];
 
       // Sort the articles based on the selected option
