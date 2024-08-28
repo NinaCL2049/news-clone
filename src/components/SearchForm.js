@@ -18,7 +18,7 @@ const SearchForm = ({
         <option value="comment">Comments</option>
         <option value="ask_hn">Ask HN</option>
         <option value="show_hn">Show HN</option>
-        <option value="jobs">Jobs</option>
+        <option value="job">Jobs</option>
         <option value="poll">Polls</option>
       </select>
 

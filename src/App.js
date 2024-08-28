@@ -7,7 +7,7 @@ import DisplayArticleCard from './components/DisplayArticleCard';
 function App(){
   const [listOfArticles, setListOfArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeSearch, setTypeSearch] = useState('all');
+  const [typeSearch, setTypeSearch] = useState('');
   const [sortBy, setSortBy] = useState('popularity');
   const [forSearch, setForSearch] = useState('');
   const [timeSearch, setTimeSearch] = useState('all-time');
@@ -21,8 +21,6 @@ function App(){
   useEffect(() => {
     if(searchQuery) {
       searchPosts(searchQuery);
-    } else if (typeSearch !== 'all') {
-      fetchTypeSearch();
     } else if (timeSearch !== 'all-time') {
       fetchTimeSearch();
     } else if (sortBy !== 'popularity') {
@@ -30,7 +28,13 @@ function App(){
     } else {
       fetchArticles();
     }
-  }, [searchQuery, sortBy, typeSearch, timeSearch]);
+  }, [searchQuery, sortBy, timeSearch]);
+
+  useEffect(() => {
+    if (typeSearch) {
+      fetchTypeSearch();
+    }
+  }, [typeSearch]);
 
   // Handle functions
   const handleInputChange = (e) => {
@@ -39,7 +43,7 @@ function App(){
 
   const handleTypeSearch = (e) => {
     setTypeSearch(e.target.value);
-    fetchTypeSearch();
+    //fetchTypeSearch(e.target.value);
   }
 
   const handleTimeSearch = (e) => {
@@ -64,10 +68,18 @@ function App(){
   // Functions for searching posts
   const searchPosts = (e) => {
     const searchQuery = document.getElementById('search-bar').value
+    let url = `https://hn.algolia.com/api/v1/search?query=${searchQuery}`
 
-    fetch(`https://hn.algolia.com/api/v1/search?query=${searchQuery}`)
+    if(typeSearch !== 'all' && sortBy === 'date') {
+      url = `https://hn.algolia.com/api/v1/search_by_date?query=${searchQuery}&tags=${typeSearch}`; 
+    } else if (sortBy !== 'date') {
+      url = `https://hn.algolia.com/api/v1/search?query=${searchQuery}&tags=${typeSearch}`;
+    }
+
+    fetch(url)
     .then((response) => response.json())
     .then((data) => {
+      console.log(url)
       setListOfArticles(data.hits);
     });
   }
@@ -106,25 +118,27 @@ function App(){
         return;
       }
 
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${queryDate}`)
+    let url = `http://hn.algolia.com/api/v1/search_by_date?query=${queryDate}`;      
+
+    fetch(url)
     .then((response) => response.json())
     .then((data) => {      
        setListOfArticles(data.hits); 
       })
   }
 
-  // Function for searching by type
+  // Function for searching by type: story, comment, ask_hn, show_hn, job, poll
   const fetchTypeSearch = () => {
-  let url;
+  let url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
 
-    if(typeSearch === 'jobs') {
-      url = `https://hn.algolia.com/api/v1/search?query=is_hiring`;
-    } else {
-      url = `https://hn.algolia.com/api/v1/search?tags=${typeSearch}`;
-    }
+  if(sortBy === 'date') {
+    url = `https://hn.algolia.com/api/v1/search_by_date?tags=${typeSearch}`;
+  }
+
     fetch(url)
     .then(response => response.json())
     .then(data => {
+      console.log(url)
       setListOfArticles(data.hits);
     })
     .catch(error => {
@@ -133,37 +147,18 @@ function App(){
   }
 
   // Function for searching by popularity/date
-  const fetchBySearch = (sortBy = 'popularity', keyword = typeSearch) => {
-    // Get the current date in the format YYYY-MM-DD 
-    const currentDate = new Date().toISOString().split('T')[0];
+  const fetchBySearch = () => {
+    let url = `https://hn.algolia.com/api/v1/search_by_date`;
 
-    fetch(`http://hn.algolia.com/api/v1/search_by_date?query=${currentDate}`)
+    if (sortBy === "date") {
+      url += `?tags=${typeSearch}`;
+    }
+
+    fetch(url)
     .then(response => response.json())
     .then(data => {
-
-      let sortedArticles = [...data.hits];
-
-      // Sort the articles based on the selected option
-      if (sortBy === 'popularity') {
-        const now = new Date();
-        sortedArticles.sort((a, b) => {
-          // Calculate the age of the post in days
-          const ageA = (now - new Date(a.created_at)) / (1000 * 60 * 60 * 24); // Age in days
-          const ageB = (now - new Date(b.created_at)) / (1000 * 60 * 60 * 24);
-
-          // Higher points are better, but older posts are worse
-          const scoreA = a.points / Math.log1p(ageA);
-          const scoreB = b.points / Math.log1p(ageB);
-        
-          // Sort by score 
-          return scoreB - scoreA;
-        });
-        // Sort by date
-      } else if (sortBy === 'date') {
-        // Sorts by most recent post made
-        sortedArticles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      }
-      setListOfArticles(sortedArticles);
+      console.log(url)
+      setListOfArticles(data.hits);
     })
     .catch(error => {
       console.log('Error:', error);
