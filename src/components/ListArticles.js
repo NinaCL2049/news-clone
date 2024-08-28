@@ -2,18 +2,15 @@ import React from 'react';
 import DisplayArticleCard from './DisplayArticleCard'
 
 const ListArticles = ({
-  title,
-  author,
+  
   url,
-  points,
-  num_comments,
-  created_at,
+
   searchQuery,
   listOfArticles
   }) => {
 
     /*Function for navigating to post url*/
-  const navigateToPost = () => {
+  const navigateToPost = (url) => {
     window.open(url, '_blank')
   }
 
@@ -62,7 +59,8 @@ const ListArticles = ({
               num_comments={article.num_comments || 'N/A'}
               created_at={article.created_at}
               searchQuery={searchQuery}
-              
+              highlightQuery={highlightQuery}
+              navigateToPost={navigateToPost}
             />
             ))
           ) : (

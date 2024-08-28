@@ -21,7 +21,8 @@ const DisplayArticleCard = (
         
   <div className='post-card-top'>
     <h2>{highlightQuery(title)}</h2>
-    <p onClick={navigateToPost}>{url}</p>
+    
+    <p onClick={() => navigateToPost(url)}>{url}</p>
   </div>
 
   <div className='post-card-bottom'>
