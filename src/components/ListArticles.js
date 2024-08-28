@@ -1,17 +1,16 @@
-import React from 'react'
+import React from 'react';
+import DisplayArticleCard from './DisplayArticleCard'
 
 const ListArticles = ({
-  title,
-  author,
+  
   url,
-  points,
-  num_comments,
-  created_at,
-  searchQuery
+
+  searchQuery,
+  listOfArticles
   }) => {
 
     /*Function for navigating to post url*/
-  const navigateToPost = () => {
+  const navigateToPost = (url) => {
     window.open(url, '_blank')
   }
 
@@ -49,23 +48,25 @@ const ListArticles = ({
 
   return (
     <div className='articles-list'>
-      <div className='post-card'>
-        
-        <div className='post-card-top'>
-          <h2>{highlightQuery(title)}</h2>
-          <p onClick={navigateToPost}>{url}</p>
-        </div>
+              {listOfArticles.length > 0 ? (
+          listOfArticles.map((article, index) => (
+            <DisplayArticleCard
+              key={index}
+              title={article.title || article.story_title}
+              author={article.author}
+              url={article.url || article.story_url}
+              points={article.points || 'N/A'}
+              num_comments={article.num_comments || 'N/A'}
+              created_at={article.created_at}
+              searchQuery={searchQuery}
+              highlightQuery={highlightQuery}
+              navigateToPost={navigateToPost}
+            />
+            ))
+          ) : (
+          <p>No stories found.</p>
+        )}
 
-        <div className='post-card-bottom'>
-          <p id='post-author'>Author: {author}</p>
-          <p>|</p>
-          <p id='post-points'>Points: {points}</p>
-          <p>|</p>
-          <p id='post-comments'>Comments: {num_comments}</p>
-          <p>|</p>
-          <p id='post-creation'>Created: {new Date(created_at).toLocaleString()}</p>
-        </div>
-      </div>
     </div>
   );
 }
