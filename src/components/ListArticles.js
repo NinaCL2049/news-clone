@@ -15,35 +15,18 @@ const ListArticles = ({
   }
 
   const highlightQuery = (text) => {
-    if(!text) return null;
-
-    if (!searchQuery) return text;
+    if (!text || !searchQuery) return text;
 
     // Escape special characters in search query
-    const escapedQuery = searchQuery.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(escapedQuery, 'gi');
+    const escapedQuery = searchQuery.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-    // Split the text based on the search query
-    const parts = text.split(regex);
-    
-    // If there's only one part, it means no match was found, so return plain text
-    if (parts.length === 1) {
-      return text;
-    }
-
-    return parts.map((part, index, array) => {
-      if (index < array.length - 1) {
-        // Highlight the part if it's not the last part (i.e., it's followed by a match)
-        return (
-          <React.Fragment key={index}>
-            {part}
-            <mark>{searchQuery}</mark>
-          </React.Fragment>
-        );
-      }
-      // Return the last part without highlighting (because it's after the last match)
-      return <React.Fragment key={index}>{part}</React.Fragment>;
-    });
+    // Replace the matched text with highlight mark
+    return text
+      .split(regex)
+      .map((part, index) =>
+        regex.test(part) ? <mark key={index}>{part}</mark> : part
+      );
   };
 
   return (
