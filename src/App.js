@@ -167,10 +167,11 @@ function App(){
 
   return (
     <div className='App'>
-      <h1>Hacker News</h1>
+      <h1>HACKER_NEWS</h1>
       
       <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchQuery) }}>
         <input
+          className='inputText'
           onChange={handleInputChange}
           value={searchQuery}
           id="search-bar" 
