@@ -1,4 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import Paper from '@mui/material/Paper';
+
 
 
 
@@ -20,19 +29,19 @@ const DisplayArticleCard = (
   <div className='post-card'>
         
   <div className='post-card-top'>
-    <h2>{highlightQuery(title)}</h2>
+    <h2 onClick={() => navigateToPost(url)}>{highlightQuery(title)}</h2>
     
     <p onClick={() => navigateToPost(url)}>{url}</p>
   </div>
 
   <div className='post-card-bottom'>
-    <p id='post-author'>Author: {author}</p>
+    <p id='post-author'>by {author}</p>
     <p>|</p>
     <p id='post-points'>Points: {points}</p>
     <p>|</p>
     <p id='post-comments'>Comments: {num_comments}</p>
     <p>|</p>
-    <p id='post-creation'>Created: {new Date(created_at).toLocaleString()}</p>
+    <p id='post-creation'>{new Date(created_at).toLocaleString()}</p>
   </div>
 </div>
 )
